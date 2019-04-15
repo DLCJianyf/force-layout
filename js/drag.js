@@ -1,18 +1,21 @@
-(function(win) {
+(function(doc) {
     /**
      * 斥力 +1
      * 引力 -1
      */
-    var w = win.innerWidth;
-    var h = win.innerHeight;
+    var w = doc.body.clientWidth;
+    var h = doc.body.clientHeight;
 
     var nodes = [];
     var edges = [];
 
     var C = 1;
-    var K = 1000;
+    var K_r = 1000;
+    var area = w * h;
+
     var maxIter = 2000;
-    var temperature = w / 100;
+    var temperature = w / 50;
+    var MAX_FORCE = 1000000;
 
     var MX = null;
     var MY = null;
@@ -41,7 +44,7 @@
         },
 
         isPointInCircle(p, c) {
-            var offset = 3;
+            var offset = 1;
             var dis = Util.distance(p, c) - offset;
 
             return c.r > dis;
@@ -52,7 +55,9 @@
         },
 
         cool(curIter) {
-            temperature *= 1.0 - curIter / maxIter;
+            //temperature *= 1.0 - curIter / maxIter;
+            var r = 0.8;
+            temperature *= r * r;
         },
 
         jiggle() {
@@ -66,15 +71,17 @@
             var distX;
             var distY;
             var dist;
+            var force;
 
             nodes.forEach(function(node, i) {
                 nodes.forEach(function(node1, j) {
                     if (i !== j) {
-                        distX = node.x - node1.x;
+                        distX = node.x - node1.x + 0.1;
                         distY = node.y - node1.y;
                         dist = Math.sqrt(distX * distX + distY * distY);
 
-                        var force = (K * K) / dist;
+                        force = (K_r * K_r) / dist;
+
                         node.vx = node.vx + (distX / dist) * force;
                         node.vy = node.vy + (distY / dist) * force;
                     }
@@ -86,8 +93,6 @@
          * 两点连线之间的引力
          */
         calculateTraction() {
-            var condenseFactor = 3;
-
             edges.forEach(function(edge) {
                 var source = edge.from;
                 var target = edge.to;
@@ -96,30 +101,37 @@
                 var distY = source.y - target.y;
                 var dist = Math.sqrt(distX * distX + distY * distY);
 
-                var force = (dist * dist) / K;
+                var dsp = dist * dist;
+                var force = dsp / (K_r * K_r);
+                //var force = K_s * dist;
 
                 source.vx = source.vx - (distX / dist) * force;
                 source.vy = source.vy - (distY / dist) * force;
                 target.vx = target.vx + (distX / dist) * force;
                 target.vy = target.vy + (distY / dist) * force;
-
-                // if (isNaN(source.vx)) {
-                //     debugger;
-                // }
-                //debugger;
             }, this);
         },
 
         updateCoordinates() {
-            var weight = 50;
+            var weight = 0.05;
+            var MAX_DISPLACEMENT_SQ = 100;
 
             nodes.forEach(function(node) {
-                var dx = node.vx / weight;
-                var dy = node.vy / weight;
+                var dx = node.vx * weight;
+                var dy = node.vy * weight;
+                // var dx = node.vx;
+                // var dy = node.vy;
 
                 // var dsp = Math.sqrt(dx * dx + dy * dy);
                 // dx = (dx / dsp) * Math.min(dsp, temperature);
                 // dy = (dy / dsp) * Math.min(dsp, temperature);
+
+                // if ((dx > 0 && dx < dx1) || (dx < 0 && dx > dx1)) {
+                //     dx = dx1;
+                // }
+                // if ((dy > 0 && dy < dy1) || (dy < 0 && dy > dy1)) {
+                //     dy = dy1;
+                // }
 
                 node.vx = dx;
                 node.vy = dy;
@@ -127,12 +139,20 @@
                 if (!(isMouseDown && node.id === target.id)) {
                     node.x += dx;
                     node.y += dy;
-                } else {
                 }
+
+                // console.log(dx, dy);
+                // console.log(temperature);
+                // console.log("------------");
+
+                if (node.x > w) node.x = w;
+                if (node.y > h) node.h = h;
+                if (node.x < 0) node.x = 0;
+                if (node.y < 0) node.y = 0;
             });
 
             //temperature *= 0.95;
-            //Util.cool(times++);
+            Util.cool();
         }
     };
 
@@ -205,10 +225,6 @@
             this.color = "#FFFFFF";
             //this.color = colors[parseInt(random(0, colors.length))];
 
-            //this.speed = random(0, 0.5);
-
-            // this.vx = random(-1, 1);
-            // this.vy = random(-1, 1);
             this.force = [0.1, 0.1];
             this.vx = 0;
             this.vy = 0;
@@ -293,7 +309,7 @@
         },
 
         clear: function() {
-            this.offCtx.clearRect(0, 0, win.innerWidth, win.innerHeight);
+            this.offCtx.clearRect(0, 0, w, h);
             this.offCtx.globalAlpha = 1.0;
         },
 
@@ -311,14 +327,14 @@
 
             animate.ctx.putImageData(animate.offCtx.getImageData(0, 0, w, h), 0, 0);
 
-            win.requestAnimationFrame(animate.step);
+            window.requestAnimationFrame(animate.step);
         }
     };
 
     animate.initCanvas();
     animate.step();
 
-    win.onmousedown = function(e) {
+    window.onmousedown = function(e) {
         MX = e.clientX;
         MY = e.clientY;
 
@@ -333,10 +349,11 @@
             }
         });
     };
-    win.onmousemove = function(e) {
+    window.onmousemove = function(e) {
         if (target) {
-            times = 0;
-            temperature = w / 100;
+            //times = 0;
+            temperature = w / 50;
+            //weight = 0.05;
 
             var dx = e.clientX - MX;
             var dy = e.clientY - MY;
@@ -348,21 +365,30 @@
             MY = e.clientY;
         }
     };
-    win.onmouseup = function(e) {
+    window.onmouseup = function(e) {
         isMouseDown = false;
         target = null;
     };
 
-    win.onresize = function() {
-        if (animate.canvas) {
-            animate.canvas.width = win.innerWidth;
-            animate.canvas.height = win.innerHeight;
+    // window.onresize = function() {
+    //     if (animate.canvas) {
+    //         animate.canvas.width = w;
+    //         animate.canvas.height = h;
 
-            animate.addNodes(relation.nodes);
-            animate.addEdges(relation.links);
+    //         animate.addNodes(relation.nodes);
+    //         animate.addEdges(relation.links);
 
-            K = Math.sqrt(40000 / relation.nodes.length);
-        }
-    };
-    win.onresize();
-})(this);
+    //         K_r = Math.sqrt(10000 / relation.nodes.length);
+    //     }
+    // };
+    // window.onresize();
+    if (animate.canvas) {
+        animate.canvas.width = w;
+        animate.canvas.height = h;
+
+        animate.addNodes(relation.nodes);
+        animate.addEdges(relation.links);
+
+        K_r = Math.sqrt(10000 / relation.nodes.length);
+    }
+})(document);
