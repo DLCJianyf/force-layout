@@ -139,6 +139,9 @@
                 if (!(isMouseDown && node.id === target.id)) {
                     node.x += dx;
                     node.y += dy;
+                } else {
+                    node.vx = 0;
+                    node.vy = 0;
                 }
 
                 // console.log(dx, dy);
@@ -146,7 +149,7 @@
                 // console.log("------------");
 
                 if (node.x > w) node.x = w;
-                if (node.y > h) node.h = h;
+                if (node.y > h) node.y = h;
                 if (node.x < 0) node.x = 0;
                 if (node.y < 0) node.y = 0;
             });
