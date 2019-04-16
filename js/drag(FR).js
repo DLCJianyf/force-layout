@@ -37,14 +37,13 @@
         },
 
         distance: function(p1, p2) {
-            return Math.sqrt(
-                Math.pow(Math.abs(p1.x - p2.x), 2),
-                Math.pow(Math.abs(p1.y - p2.y), 2)
-            );
+            var $x = p1.x - p2.x;
+            var $y = p1.y - p2.y;
+            return Math.sqrt($x * $x + $y * $y);
         },
 
         isPointInCircle(p, c) {
-            var offset = 1;
+            var offset = 3;
             var dis = Util.distance(p, c) - offset;
 
             return c.r > dis;
