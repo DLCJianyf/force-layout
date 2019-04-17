@@ -1,7 +1,13 @@
-#引力导向图，使用 FR 算法实现
+#引力导向图，分别使用 FR 算法与 D3 算法实现
 
-![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/引力导向图1.png)
+![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/FR-单节点.png)
 
-![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/引力导向图2.png)
+![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/FR-节点关系.png)
 
-![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/11111.gif)
+![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/节点关系-静态.png)
+
+![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/大数据-静态.png)
+
+![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/节点关系.gif)
+
+![image](https://github.com/DLCJianyf/force-layout/blob/master/imgs/大数据.gif)
