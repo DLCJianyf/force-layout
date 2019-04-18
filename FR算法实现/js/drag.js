@@ -111,8 +111,25 @@
             }, this);
         },
 
+        center() {
+            var alpha = 1;
+            //权重，中心店吸引力减缓参数
+            var strength = 0.1;
+            //计算中心点;
+            var px = w / 2;
+            var py = h / 2;
+            //px > py ? (px = py) : (py = px);
+
+            for (var i = 0, n = nodes.length, node; i < n; ++i) {
+                (node = nodes[i]),
+                    //越靠近中心点，中心点吸引力越小
+                    (node.vy += (py - node.y) * strength * alpha),
+                    (node.vx += (px - node.x) * strength * alpha);
+            }
+        },
+
         updateCoordinates() {
-            var weight = 0.05;
+            var weight = 0.1;
             var MAX_DISPLACEMENT_SQ = 100;
 
             nodes.forEach(function(node) {
@@ -287,6 +304,7 @@
         updateNodes: function() {
             Util.calculateRepulsive();
             Util.calculateTraction();
+            Util.center();
             Util.updateCoordinates();
         },
 
